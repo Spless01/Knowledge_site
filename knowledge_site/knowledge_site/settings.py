@@ -94,29 +94,21 @@ WSGI_APPLICATION = 'knowledge_site.wsgi.application'
 #            'PORT': '5433',
 #        }
 #    }
-#if DEBUG:
-#    DATABASES = {
-#        'default': {
-#            'ENGINE': 'django.db.backends.postgresql',
-#            'NAME': 'knowledge_db',
-#            'USER': 'postgres',
-#            'PASSWORD': 'password123',
-#            'HOST': 'localhost',
-#            'PORT': '5433',
-#        }
-#    }
-#else:
-#    DATABASES = {
-#        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-#    }
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default="postgresql://postgres:password123@localhost:5433/knowledge_db",
-        conn_max_age=600,
-        ssl_require=False
-    )
-}
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'knowledge_db',
+            'USER': 'postgres',
+            'PASSWORD': 'password123',
+            'HOST': 'localhost',
+            'PORT': '5433',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
 
 
 # Password validation
