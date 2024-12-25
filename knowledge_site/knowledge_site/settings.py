@@ -79,9 +79,8 @@ WSGI_APPLICATION = 'knowledge_site.wsgi.application'
 
 
 # Сначала проверьте, существует ли переменная окружения DATABASE_URL
-DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-}
+
+
 
 # Если вы хотите оставить локальную конфигурацию для разработки:
 #if DEBUG:  # DEBUG обычно True в разработке
@@ -95,7 +94,21 @@ DATABASES = {
 #            'PORT': '5433',
 #        }
 #    }
-
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'knowledge_db',
+            'USER': 'postgres',
+            'PASSWORD': 'password123',
+            'HOST': 'localhost',
+            'PORT': '5433',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
 
 
 # Password validation
