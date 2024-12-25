@@ -84,17 +84,17 @@ DATABASES = {
 }
 
 # Если вы хотите оставить локальную конфигурацию для разработки:
-if DEBUG:  # DEBUG обычно True в разработке
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'knowledge_db',
-            'USER': 'postgres',
-            'PASSWORD': 'password123',
-            'HOST': 'localhost',
-            'PORT': '5433',
-        }
-    }
+#if DEBUG:  # DEBUG обычно True в разработке
+#    DATABASES = {
+#        'default': {
+#            'ENGINE': 'django.db.backends.postgresql',
+#            'NAME': 'knowledge_db',
+#            'USER': 'postgres',
+#            'PASSWORD': 'password123',
+#            'HOST': 'localhost',
+#            'PORT': '5433',
+#        }
+#    }
 
 
 
