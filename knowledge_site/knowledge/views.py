@@ -161,6 +161,7 @@ subtopic_translation_dict = {
 def home(request):
     return render(request, 'knowledge/home.html')
 
+
 def search_articles(request):
     field_id = request.GET.get("field", "")
     query = request.GET.get("query", "")
@@ -180,10 +181,15 @@ def search_articles(request):
     if query:
         articles = articles.filter(title__icontains=query)
 
+    # Пагинация
+    paginator = Paginator(articles, 10)  # 10 статей на страницу
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     # Отправка данных в шаблон
     return render(request, "knowledge/search.html", {
         "fields": fields,
-        "articles": articles,
+        "articles": page_obj,
         "selected_field": field_id,
         "query": query
     })

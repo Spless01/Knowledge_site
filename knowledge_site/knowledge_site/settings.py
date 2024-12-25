@@ -114,7 +114,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default="postgresql://postgres:password123@localhost:5433/knowledge_db",
         conn_max_age=600,
-        ssl_require=False  # Установите False
+        ssl_require=False
     )
 }
 

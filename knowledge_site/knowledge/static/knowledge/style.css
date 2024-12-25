@@ -1,138 +1,123 @@
-/* Общие стили */
+/* Основные стили для страницы */
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f9f9f9;
     color: #333;
 }
 
 .container {
-    width: 90%;
     max-width: 800px;
-    margin: 30px auto;
-    background: #fff;
-    padding: 20px 30px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 20px;
     border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* Заголовок */
 h1 {
     text-align: center;
-    color: #2c3e50;
-    font-size: 28px;
+    color: #333;
     margin-bottom: 20px;
 }
 
+/* Форма поиска */
 form {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-}
-
-form label {
-    font-size: 14px;
-    font-weight: bold;
-    color: #555;
+    gap: 10px;
 }
 
 form select,
 form input[type="text"] {
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
     font-size: 16px;
-    transition: border-color 0.3s ease;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-grow: 1;
 }
 
-form select:focus,
-form input[type="text"]:focus {
-    border-color: #3498db;
-    outline: none;
-}
-
-form button {
-    background-color: #3498db;
-    color: white;
+form input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: #fff;
     border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 16px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
 }
 
-form button:hover {
-    background-color: #2980b9;
+form input[type="submit"]:hover {
+    background-color: #0056b3;
 }
 
-/* Секция результатов */
-#results h2 {
-    font-size: 22px;
-    color: #2c3e50;
-    border-bottom: 2px solid #3498db;
-    padding-bottom: 10px;
+/* Список результатов */
+.results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.results li {
     margin-bottom: 20px;
-}
-
-.result-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.article {
-    background: #f9f9f9;
     padding: 15px;
+    background: #f4f4f4;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 4px;
 }
 
-.article:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
-}
-
-.article h3 {
+.results li h3 {
     margin: 0 0 10px;
-    font-size: 18px;
-    color: #2c3e50;
+    color: #007BFF;
 }
 
-.article p {
+.results li p {
     margin: 5px 0;
-    font-size: 14px;
-    color: #555;
 }
 
-.article a {
-    color: #3498db;
+.results li a {
+    color: #007BFF;
     text-decoration: none;
     font-weight: bold;
 }
 
-.article a:hover {
+.results li a:hover {
     text-decoration: underline;
-    color: #2980b9;
 }
 
-/* Для пустых результатов */
-p.empty {
-    text-align: center;
-    color: #888;
-    font-style: italic;
+/* Пагинация */
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
 }
 
-/* Медиа-запросы для мобильных устройств */
-@media (max-width: 600px) {
-    form {
-        flex-direction: column;
-    }
+.pagination li {
+    margin: 0 5px;
+}
 
-    form button {
-        width: 100%;
-    }
+.pagination a {
+    display: block;
+    padding: 10px 15px;
+    background: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.pagination a:hover {
+    background: #0056b3;
+}
+
+.pagination .active {
+    background: #0056b3;
+    pointer-events: none;
 }
