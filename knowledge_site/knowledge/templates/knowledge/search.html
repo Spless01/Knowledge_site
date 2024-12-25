@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uk">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пошук статей</title>
+    <link rel="stylesheet" href="{% static 'knowledge/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Пошук статей</h1>
+        <form method="GET" action="">
+            <select name="field" id="field">
+                {% for field in fields %}
+                    <option value="{{ field.id }}">{{ field.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="query" placeholder="Пошук статей..." value="{{ request.GET.query }}">
+            <button type="submit">Пошук</button>
+        </form>
+
+        <div id="results">
+            <h2>Результати:</h2>
+            <div class="result-container">
+                {% for article in articles %}
+                <div class="article">
+                    <h3>{{ article.title }}</h3>
+                    <p>Автор: {{ article.author }}</p>
+                    {% if article.doi %}
+                    <p>DOI: <a href="{{ article.doi }}" target="_blank">{{ article.doi }}</a></p>
+                    {% endif %}
+                    <p>Посилання: <a href="{{ article.link }}" target="_blank">Перейти до статті</a></p>
+                </div>
+                {% empty %}
+                <p>Нічого не знайдено</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
