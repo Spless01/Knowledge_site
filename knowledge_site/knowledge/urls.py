@@ -1,9 +1,12 @@
 from django.urls import path
 from knowledge import views
+# journals/urls.py
+from .views import JournalListView
+
+
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('articles/', views.search_articles, name='search_articles'),
-    path('vidannya/', views.search_vidannya, name='search_vidannya'),
     path('journals/', views.journals_view, name='journals'),
+    path('vidannya/', JournalListView.as_view(), name='journal_list'),
 ]

@@ -112,7 +112,7 @@ WSGI_APPLICATION = 'knowledge_site.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default="postgresql://postgres:password123@localhost:5433/knowledge_db",
+        default="postgresql://postgres:YXJYRpgetAoJCOLwjRcdmWivqWShOdMf@junction.proxy.rlwy.net:48321/railway",
         conn_max_age=600,
         ssl_require=False
     )

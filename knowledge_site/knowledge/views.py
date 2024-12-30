@@ -4,7 +4,8 @@ from django.http import JsonResponse
 from knowledge.models import Vidannya, GaluzNauki
 from knowledge.models import Subject, Subtopic, JournalArticle
 from django.core.paginator import Paginator
-
+from django.views.generic import ListView
+from .models import Journal
 theme_translation_dict = {
     "History": "Історія",
     "Engineering": "Інженерія",
@@ -270,3 +271,32 @@ def journals_view(request):
     return render(request, "knowledge/journals.html", context)
 
 
+# journals/views.py
+
+class JournalListView(ListView):
+    model = Journal
+    template_name = 'knowledge/journal_list.html'  # укажите свой путь
+    context_object_name = 'journals'
+    paginate_by = 20  # например, пагинация на 20 записей
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        # Получаем данные из GET-запроса
+        search_query = self.request.GET.get('q', '')  # строка поиска (название)
+        science_field_filter = self.request.GET.get('science', '')  # галузь науки
+        specialty_filter = self.request.GET.get('specialty', '')    # спеціальність
+
+        # Фильтр по названию
+        if search_query:
+            qs = qs.filter(title__icontains=search_query)
+
+        # Фильтр по галузі науки
+        if science_field_filter:
+            qs = qs.filter(science_field__icontains=science_field_filter)
+
+        # Фильтр по спеціальності
+        if specialty_filter:
+            qs = qs.filter(specialty__icontains=specialty_filter)
+
+        return qs

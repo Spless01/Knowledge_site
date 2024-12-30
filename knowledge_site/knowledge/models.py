@@ -80,3 +80,14 @@ class JournalArticle(models.Model):  # Статья
     class Meta:
         verbose_name = "Журнал"
         verbose_name_plural = "Журналы"
+
+
+class Journal(models.Model):
+    science_field = models.CharField(max_length=2550, blank=True)   # Галузь науки
+    specialty = models.CharField(max_length=2550, blank=True)       # Спеціальність
+    title = models.CharField(max_length=1000)                       # Назва видання
+    link = models.URLField(blank=True, null=True)                  # Ссылка
+    issn = models.CharField(max_length=1000, blank=True)            # ISSN/eISSN
+
+    def __str__(self):
+        return self.title
