@@ -56,13 +56,14 @@ ROOT_URLCONF = 'knowledge_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'knowledge/templates')],  # Путь к директории с шаблонами
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Путь к директории с шаблонами
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'knowledge.context_processors.auth_forms',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -149,7 +150,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 

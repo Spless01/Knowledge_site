@@ -1,21 +1,242 @@
 <!DOCTYPE html>
 <html lang="uk">
+{% load static %}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title>Головна</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Головна</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- AOS -->
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <style>
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      filter: brightness(0.85);
+    }
+
+    .overlay {
+      background-color: rgba(255, 255, 255, 0.6);
+      flex-grow: 1;
+      padding: 3rem;
+      text-align: center;
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: rgba(248, 249, 250, 0.9);
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .navbar {
+      background-color: rgba(255, 255, 255, 0.95);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      color: #0056b3;
+    }
+
+    .nav-link {
+      font-size: 1rem;
+      color: #0056b3 !important;
+    }
+
+    blockquote {
+      font-size: 1.1rem;
+      color: #212529;
+    }
+
+    #clock {
+      font-weight: 500;
+      font-size: 1rem;
+      color: #212529;
+    }
+
+    .dropdown-menu {
+      min-width: 160px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Вітаємо на нашому сайті!</h1>
-        <p class="text-center">Оберіть, що ви хочете знайти:</p>
-        <div class="d-flex justify-content-center mt-4">
 
-            <a href="/vidannya/" class="btn btn-secondary mx-2">Пошук видань</a>
+<!-- Фонове відео -->
+<video autoplay muted loop id="bgVideo">
+  <source src="{% static 'video/book-loop.mp4' %}" type="video/mp4">
+</video>
 
-            <a href="/journals/" class="btn btn-success mx-2">Пошук наукових журналів</a>
+<!-- Навігація -->
+<nav class="navbar navbar-expand-lg px-4 d-flex justify-content-between align-items-center">
+  <a class="navbar-brand" href="#">Науковий Пошук</a>
+  <div id="clock"></div>
+  <div class="d-flex gap-3 align-items-center">
+    {% if user.is_authenticated %}
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="{% static 'img/user.png' %}" alt="profile" width="32" height="32" class="rounded-circle">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+          <a href="{% url 'profile' %}" class="dropdown-item">Мій профіль</a>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="{% url 'logout' %}">Вийти</a></li>
+        </ul>
+      </div>
+    {% else %}
+      <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#loginModal">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Логін
+      </a>
+      <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#registerModal">
+        <i class="bi bi-person-plus me-1"></i> Реєстрація
+      </a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- Контент -->
+<div class="overlay">
+  <h1 class="text-primary mb-3" data-aos="fade-down">Вітаємо на нашому сайті!</h1>
+  <p class="mb-4" data-aos="fade-up">Оберіть, що ви хочете знайти:</p>
+
+  <div class="d-flex justify-content-center gap-3 mb-4" data-aos="zoom-in">
+    <a href="/vidannya/" class="btn btn-outline-primary">
+      <i class="bi bi-journals"></i> Пошук видань
+    </a>
+    <a href="/journals/" class="btn btn-success">
+      <i class="bi bi-search"></i> Пошук наукових журналів
+    </a>
+  </div>
+
+  <blockquote id="quote" class="fst-italic" data-aos="fade-in" data-aos-delay="300"></blockquote>
+</div>
+
+<!-- Футер -->
+<footer>
+  © 2025 Коваль Максим Юрійович. Веб-додаток для пошуку наукових джерел.
+</footer>
+
+<!-- Модалка: Логін -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% for message in messages %}
+          <div class="alert alert-danger m-2">{{ message }}</div>
+        {% endfor %}
+        <div class="modal-header">
+          <h5 class="modal-title">Вхід</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>Email або логін</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Пароль</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Увійти</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
+<!-- Модалка: Реєстрація -->
+<div class="modal fade" id="registerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        {% for message in messages %}
+          <div class="alert alert-danger m-2">{{ message }}</div>
+        {% endfor %}
+        <div class="modal-header">
+          <h5 class="modal-title">Реєстрація</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>Ім’я користувача</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label>Пароль</label>
+            <input type="password" name="password1" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Повторіть пароль</label>
+            <input type="password" name="password2" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Зареєструватись</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init();
+
+  // Час
+  function updateClock() {
+    const now = new Date();
+    document.getElementById("clock").innerText = now.toLocaleTimeString("uk-UA");
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Цитати
+  const quotes = [
+    "«Знання — це скарб, а вміння вчитися — ключ до нього.» — Леся Українка",
+    "«Наука — це найважливіша сила, яка перетворює світ.» — Борис Патон",
+    "«Хто не знає свого минулого — той не вартий майбутнього.» — Михайло Грушевський",
+    "«У боротьбі здобудеш світло, у праці — істину.» — Іван Франко",
+    "«Світ належить тому, хто його пізнає.» — Володимир Вернадський",
+    "«Народ, що не знає своєї історії, є народ сліпців.» — Іван Огієнко",
+    "«Знання народжуються в тиші, а помилки — в шумі.» — Григорій Сковорода",
+    "«Шукай істину. Вона завжди поруч — тільки серцем треба чути.» — Пантелеймон Куліш"
+  ];
+  document.getElementById("quote").innerText = quotes[Math.floor(Math.random() * quotes.length)];
+
+  // Автовідкриття модалок через GET параметри
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("login_error") === "1") {
+    new bootstrap.Modal(document.getElementById('loginModal')).show();
+  } else if (params.get("register_error") === "1") {
+    new bootstrap.Modal(document.getElementById('registerModal')).show();
+  }
+</script>
+
+
+
 </body>
 </html>

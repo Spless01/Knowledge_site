@@ -1,0 +1,54 @@
+{% extends 'knowledge/base.html' %}
+{% block title %}Мій профіль{% endblock %}
+{% block content %}
+<div class="container" data-aos="fade-up">
+  <h2 class="mb-4">Профіль користувача</h2>
+  <div class="card shadow-sm p-4">
+    <p><strong>Ім’я користувача:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Дата приєднання:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+    <p><strong>Останній вхід:</strong> {{ user.last_login|date:"d.m.Y H:i" }}</p>
+    <a href="{% url 'logout' %}" class="btn btn-outline-danger mt-3">Вийти з акаунту</a>
+  </div>
+
+  <div class="mt-5">
+    <h4>Обрані журнали</h4>
+    {% if favorite_journals %}
+      <ul class="list-group">
+        {% for item in favorite_journals %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ item.journal_article.title }}</span>
+            {% if item.journal_article.article_link %}
+              <a href="{{ item.journal_article.article_link }}" target="_blank" class="btn btn-sm btn-outline-primary">Переглянути</a>
+            {% else %}
+              <span class="text-muted">Посилання відсутнє</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Немає обраних журналів.</p>
+    {% endif %}
+  </div>
+
+  <div class="mt-4">
+    <h4>Обрані видання</h4>
+    {% if favorite_vidannya %}
+      <ul class="list-group">
+        {% for item in favorite_vidannya %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ item.vidannya.title }}</span>
+            {% if item.vidannya.link %}
+              <a href="{{ item.vidannya.link }}" target="_blank" class="btn btn-sm btn-outline-primary">Переглянути</a>
+            {% else %}
+              <span class="text-muted">Посилання відсутнє</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Немає обраних видань.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

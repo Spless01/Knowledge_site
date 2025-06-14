@@ -1,166 +1,110 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8">
-  <title>Список видань</title>
-  <!-- Подключаем Bootstrap 5 (через CDN) -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-    crossorigin="anonymous"
-  />
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-<div class="container mt-4">
-  <h1 class="mb-4">Список видань</h1>
+{% block title %}Список Видань{% endblock %}
 
-  <!-- Форма поиска и фильтрации -->
-  <form method="get" class="row g-3 mb-3">
-    <!-- Поиск по названию (q) -->
-    <div class="col-sm-4 col-md-3 col-lg-2">
-      <label class="form-label">Назва:</label>
-      <input
-        type="text"
-        name="q"
-        class="form-control"
-        value="{{ request.GET.q }}"
-        placeholder="Введите название..."
-      >
-    </div>
+{% block content %}
+<div class="container py-4" data-aos="fade-up">
+  <h1 class="text-center text-primary mb-4" data-aos="fade-down">Список Видань</h1>
 
-    <!-- Поиск по галузі науки (science_field) -->
-    <div class="col-sm-4 col-md-3 col-lg-2">
-      <label class="form-label">Науки:</label>
-      <input
-        type="text"
-        name="science"
-        class="form-control"
-        value="{{ request.GET.science }}"
-        placeholder="Напр. технічні"
-      >
-    </div>
+  <form method="GET" class="card p-4 mb-4 shadow-sm" data-aos="fade-up">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Галузь науки</label>
+        <select name="field" class="form-select">
+          <option value="">Всі галузі</option>
+          {% for galuz_item in galuz %}
+            <option value="{{ galuz_item.name }}" {% if field == galuz_item.name %}selected{% endif %}>
+              {{ galuz_item.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-    <!-- Поиск по специальности (specialty) -->
-    <div class="col-sm-4 col-md-3 col-lg-2">
-      <label class="form-label">Спеціальності:</label>
-      <input
-        type="text"
-        name="specialty"
-        class="form-control"
-        value="{{ request.GET.specialty }}"
-        placeholder="Напр. 191, 192"
-      >
-    </div>
+      <div class="col-md-5">
+        <label class="form-label fw-bold">Назва</label>
+        <input type="text" name="q" class="form-control" placeholder="Пошук за назвою" value="{{ query }}">
+      </div>
 
-    <div class="col-sm-4 col-md-3 col-lg-2 d-flex align-items-end">
-      <button
-        type="submit"
-        class="btn btn-primary"
-      >
-        Фильтровать
-      </button>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-success w-100">
+          <i class="bi bi-search"></i> Фільтрувати
+        </button>
+      </div>
     </div>
   </form>
 
-  <!-- Таблица результатов -->
-  <div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">Науки</th>
-          <th scope="col">Спеціальності</th>
-          <th scope="col">Назва</th>
-          <th scope="col">ISSN</th>
-          <th scope="col" class="text-center">Домашня сторінка</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for journal in journals %}
-        <tr>
-          <td>{{ journal.science_field }}</td>
-          <td>{{ journal.specialty }}</td>
-          <td>{{ journal.title }}</td>
-          <td>{{ journal.issn }}</td>
-          <td class="text-center">
-            {% if journal.link %}
-              <a
-                href="{{ journal.link }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-sm btn-outline-primary"
-              >
-                Перейти
+  {% if vidannya_list %}
+    <ul class="list-group">
+      {% for item in vidannya_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-1">{{ item.name }}</h5>
+            <p class="mb-0">
+              <strong>Галузь:</strong> {{ item.galuz.name }} |
+              <strong>ISSN:</strong> {{ item.issn }}
+            </p>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <a href="#" onclick="toggleFavorite({{ item.id }}, 'vidannya'); return false;">
+              <i id="fav-vidannya-{{ item.id }}"
+                 class="bi {% if item.id in favorite_vidannya_ids %}bi-star-fill text-warning{% else %}bi-star{% endif %}"
+                 style="font-size: 1.3rem;"></i>
+            </a>
+            {% if item.link %}
+              <a href="{{ item.link }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                <i class="bi bi-box-arrow-up-right"></i> Перейти
               </a>
-            {% else %}
-              —
             {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="5" class="text-center">Нет данных</td>
-        </tr>
+          </div>
+        </li>
       {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    </ul>
 
-  <!-- Пагинация (центрируем + сохраняем GET-параметры) -->
-  {% if is_paginated %}
-    <nav aria-label="Page navigation" class="mt-3">
+    <nav class="mt-4">
       <ul class="pagination justify-content-center">
-
-        <!-- "Предыдущая" -->
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link"
-               href="?q={{ request.GET.q }}&science={{ request.GET.science }}&specialty={{ request.GET.specialty }}&page={{ page_obj.previous_page_number }}"
-            >
-              Предыдущая
-            </a>
+            <a class="page-link" href="?{% if field %}field={{ field }}&{% endif %}{% if query %}q={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a>
           </li>
         {% endif %}
 
-        <!-- Номера страниц -->
-        {% for i in page_obj.paginator.page_range %}
-          {% if page_obj.number == i %}
-            <li class="page-item active" aria-current="page">
-              <span class="page-link">{{ i }}</span>
-            </li>
-          {% else %}
-            <li class="page-item">
-              <a class="page-link"
-                 href="?q={{ request.GET.q }}&science={{ request.GET.science }}&specialty={{ request.GET.specialty }}&page={{ i }}"
-              >
-                {{ i }}
-              </a>
+        {% for page_num in page_obj.paginator.page_range %}
+          {% if page_num >= page_obj.number|add:'-2' and page_num <= page_obj.number|add:'2' %}
+            <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+              <a class="page-link" href="?{% if field %}field={{ field }}&{% endif %}{% if query %}q={{ query }}&{% endif %}page={{ page_num }}">{{ page_num }}</a>
             </li>
           {% endif %}
         {% endfor %}
 
-        <!-- "Следующая" -->
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link"
-               href="?q={{ request.GET.q }}&science={{ request.GET.science }}&specialty={{ request.GET.specialty }}&page={{ page_obj.next_page_number }}"
-            >
-              Следующая
-            </a>
+            <a class="page-link" href="?{% if field %}field={{ field }}&{% endif %}{% if query %}q={{ query }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a>
           </li>
         {% endif %}
-
       </ul>
     </nav>
+  {% else %}
+    <p class="text-center text-muted mt-5">Нічого не знайдено за обраними критеріями.</p>
   {% endif %}
 </div>
 
-<!-- Bootstrap JS (необязательно, но полезно для компонентов Bootstrap) -->
-<script
-  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+POSuK1CzY2yOW8yPZK17GhUh0VM9"
-  crossorigin="anonymous"
-></script>
-</body>
-</html>
+<!-- JavaScript -->
+<script>
+  function toggleFavorite(itemId, type) {
+    fetch(`/toggle-favorite/?id=${itemId}&type=${type}`)
+      .then(response => response.json())
+      .then(data => {
+        const icon = document.getElementById(`fav-${type}-${itemId}`);
+        if (icon) {
+          icon.classList.toggle("bi-star");
+          icon.classList.toggle("bi-star-fill");
+          icon.classList.toggle("text-warning");
+        }
+      })
+      .catch(error => {
+        console.error("Помилка при додаванні до обраного:", error);
+      });
+  }
+</script>
+{% endblock %}

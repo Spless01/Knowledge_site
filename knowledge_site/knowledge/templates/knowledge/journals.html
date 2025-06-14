@@ -1,91 +1,92 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Наукові журнали</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Наукові журнали</h1>
+{% extends 'knowledge/base.html' %}
+{% block title %}Наукові журнали{% endblock %}
+{% block content %}
 
-        <!-- Форма фильтрации -->
-        <form method="get" class="row g-3 mb-4">
-            <div class="col-md-4">
-                <select name="theme" class="form-select" onchange="this.form.submit()">
-                    <option value="">Всі теми</option>
-                    {% for subject in subjects %}
-                    <option value="{{ subject.name }}" {% if selected_theme == subject.name %}selected{% endif %}>
-                        {{ subject.name_uk }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <select name="subtopic" class="form-select" {% if not selected_theme %}disabled{% endif %} onchange="this.form.submit()">
-                    <option value="">Всі підтеми</option>
-                    {% for subtopic in subtopics %}
-                    <option value="{{ subtopic.name }}" {% if selected_subtopic == subtopic.name %}selected{% endif %}>
-                        {{ subtopic.name_uk }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <input type="text" name="q" class="form-control" placeholder="Пошук журналів за назвою чи автором" value="{{ query }}">
-            </div>
-            <div class="col-md-12 text-center">
-                <button type="submit" class="btn btn-primary">Фільтрувати</button>
-            </div>
-        </form>
+<h1 class="text-center text-primary mb-4">Наукові журнали</h1>
 
-        <!-- Таблица с журналами -->
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Назва</th>
-                    <th>Автор</th>
-                    <th>Посилання</th>
-                    <th>Завантаження</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for journal in journals %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ journal.title }}</td>
-                    <td>{{ journal.author }}</td>
-                    <td><a href="{{ journal.link }}" target="_blank">Переглянути</a></td>
-                    <td><a href="{{ journal.download_link }}" target="_blank">Завантажити</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Пагинация -->
-        <div class="d-flex justify-content-center mt-4">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    {% if journals.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ journals.previous_page_number }}&theme={{ selected_theme }}&subtopic={{ selected_subtopic }}&q={{ query }}">Назад</a>
-                    </li>
-                    {% endif %}
-                    {% for num in journals.paginator.page_range %}
-                    <li class="page-item {% if journals.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}&theme={{ selected_theme }}&subtopic={{ selected_subtopic }}&q={{ query }}">{{ num }}</a>
-                    </li>
-                    {% endfor %}
-                    {% if journals.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ journals.next_page_number }}&theme={{ selected_theme }}&subtopic={{ selected_subtopic }}&q={{ query }}">Вперед</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+<form method="get" class="card p-4 mb-4 shadow-sm" data-aos="fade-up">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <select name="theme" class="form-select" onchange="this.form.submit()">
+        <option value="">Всі теми</option>
+        {% for subject in subjects %}
+          <option value="{{ subject.name }}" {% if selected_theme == subject.name %}selected{% endif %}>
+            {{ subject.name_uk }}
+          </option>
+        {% endfor %}
+      </select>
     </div>
-</body>
-</html>
+    <div class="col-md-4">
+      <select name="subtopic" class="form-select" {% if not selected_theme %}disabled{% endif %} onchange="this.form.submit()">
+        <option value="">Всі підтеми</option>
+        {% for subtopic in subtopics %}
+          <option value="{{ subtopic.name }}" {% if selected_subtopic == subtopic.name %}selected{% endif %}>
+            {{ subtopic.name_uk }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <input type="text" name="q" class="form-control" placeholder="Пошук журналів за назвою чи автором" value="{{ query }}">
+    </div>
+  </div>
+  <div class="text-end mt-3">
+    <button type="submit" class="btn btn-primary">Фільтрувати</button>
+  </div>
+</form>
+
+<div class="table-responsive" data-aos="fade-up" data-aos-delay="100">
+  <table class="table table-bordered table-hover align-middle bg-white shadow-sm">
+    <thead class="table-dark text-center">
+      <tr>
+        <th>Улюблене</th>
+        <th>Назва</th>
+        <th>Автор</th>
+        <th>Посилання</th>
+        <th>Завантаження</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for journal in journals %}
+  <tr>
+    <td class="text-center">
+      <a href="#" onclick="toggleFavorite({{ journal.id }}, 'journal'); return false;">
+        <i id="fav-journal-{{ journal.id }}"
+           class="bi {% if journal.id in favorite_journal_ids %}bi-star-fill text-warning{% else %}bi-star{% endif %}">
+        </i>
+      </a>
+    </td>
+    <td>{{ journal.title }}</td>
+    <td>{{ journal.author }}</td>
+    <td class="text-center">
+      <a href="{{ journal.article_link }}" target="_blank" class="btn btn-outline-primary btn-sm">Переглянути</a>
+    </td>
+    <td class="text-center">
+      <a href="{{ journal.download_link }}" target="_blank" class="btn btn-outline-success btn-sm">Завантажити</a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
+
+  </table>
+</div>
+
+<script>
+  function toggleFavorite(id, type) {
+    fetch(`/toggle-favorite/?id=${id}&type=${type}`)
+      .then(res => res.json())
+      .then(data => {
+        const icon = document.getElementById(`fav-${type}-${id}`);
+        if (icon.classList.contains('bi-star')) {
+          icon.classList.remove('bi-star');
+          icon.classList.add('bi-star-fill', 'text-warning');
+        } else {
+          icon.classList.remove('bi-star-fill', 'text-warning');
+          icon.classList.add('bi-star');
+        }
+      });
+  }
+</script>
+
+{% endblock %}

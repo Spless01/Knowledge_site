@@ -6,12 +6,11 @@ from knowledge.models import Journal
 from tqdm import tqdm
 
 class Command(BaseCommand):
-    help = "Парсим данные с https://openscience.in.ua/ab-journals и сохраняем в БД."
+    help = "Парсинг даних с https://openscience.in.ua/ab-journals та зберігаємо у БД."
 
     def handle(self, *args, **options):
         url = "https://openscience.in.ua/ab-journals"
 
-        # Кастомный User-Agent
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -20,18 +19,18 @@ class Command(BaseCommand):
             )
         }
 
-        # Ждём 3 секунды перед запросом
+        # Чекаємо 3 сек перед запитом
         time.sleep(1)
 
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
-            self.stdout.write(self.style.ERROR(f"Не удалось открыть {url} (код {response.status_code})"))
+            self.stdout.write(self.style.ERROR(f"Не вдалося відкрити {url} (код {response.status_code})"))
             return
 
         soup = BeautifulSoup(response.text, "html.parser")
         table = soup.find("table", attrs={"id": "tablepress-28"})
         if not table:
-            self.stdout.write(self.style.ERROR("Таблица с id='tablepress-28' не найдена."))
+            self.stdout.write(self.style.ERROR("Таблиця с id='tablepress-28' не знайдена."))
             return
 
         rows = table.find("tbody").find_all("tr", recursive=False)
@@ -40,7 +39,7 @@ class Command(BaseCommand):
         created_count = 0
         updated_count = 0
 
-        # Используем tqdm, чтобы отобразить прогресс прохода по строкам
+        # Використовуємо tqdm, щоб відобразити прогресс проходу по рядкам
         for row in tqdm(rows, desc="Парсинг строк", total=total):
             science_field_td = row.find("td", class_="column-2")
             specialty_td = row.find("td", class_="column-3")
@@ -79,5 +78,5 @@ class Command(BaseCommand):
                 updated_count += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f"\nГотово! Добавлено {created_count}, обновлено {updated_count}."
+            f"\nВиконано! Додано {created_count}, Оновлено {updated_count}."
         ))

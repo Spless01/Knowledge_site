@@ -6,6 +6,79 @@ from knowledge.models import Subject, Subtopic, JournalArticle
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from .models import Journal
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login, authenticate
+from django.contrib import messages
+from .models import FavoriteItem
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def toggle_favorite(request):
+    item_type = request.GET.get("type")
+    item_id = request.GET.get("id")
+
+    if item_type == "journal":
+        obj, created = FavoriteItem.objects.get_or_create(
+            user=request.user,
+            journal_article_id=item_id
+        )
+    elif item_type == "vidannya":
+        obj, created = FavoriteItem.objects.get_or_create(
+            user=request.user,
+            vidannya_id=item_id
+        )
+    else:
+        return JsonResponse({"status": "error"}, status=400)
+
+    if not created:
+        obj.delete()
+
+    return JsonResponse({"status": "ok", "action": "added" if created else "removed"})
+
+
+
+def home(request):
+    reg_form = UserCreationForm()
+    login_form = AuthenticationForm()
+    return render(request, 'knowledge/home.html', {
+        'reg_form': reg_form,
+        'login_form': login_form
+    })
+
+def register_user(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+            return redirect(f"{reverse('home')}?register_error=1")
+    return redirect('home')
+
+
+from django.urls import reverse
+
+def login_user(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('home')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+            return redirect(f"{reverse('home')}?login_error=1")
+    return redirect('home')
+
+from django.contrib.auth import logout
+
+def logout_user(request):
+    logout(request)
+    return redirect('home')
 theme_translation_dict = {
     "History": "Історія",
     "Engineering": "Інженерія",
@@ -196,47 +269,58 @@ def search_articles(request):
     })
 
 
+from .models import Vidannya, FavoriteItem, GaluzNauki
+
 def search_vidannya(request):
-    # Получаем параметры фильтрации
-    field = request.GET.get("field", "")
-    query = request.GET.get("q", "")
+    query = request.GET.get('q', '')
+    field = request.GET.get('field', '')
 
-    # Фильтрация по области науки и поисковому запросу
-    vidannya_list = Vidannya.objects.all()
-    if field:
-        vidannya_list = vidannya_list.filter(galuz__name=field)
+    vidannya_qs = Vidannya.objects.all()
+
     if query:
-        vidannya_list = vidannya_list.filter(name__icontains=query)
+        vidannya_qs = vidannya_qs.filter(title__icontains=query)
+    if field:
+        vidannya_qs = vidannya_qs.filter(galuz__name=field)
 
-    # Пагинация (10 записей на странице)
-    paginator = Paginator(vidannya_list, 10)
-    page_number = request.GET.get("page")
+    # ДОБАВИ ЦЕ ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+    favorite_vidannya_ids = []
+    if request.user.is_authenticated:
+        favorite_vidannya_ids = FavoriteItem.objects.filter(
+            user=request.user,
+            vidannya__isnull=False
+        ).values_list('vidannya_id', flat=True)
+
+    # пагінація (якщо є)
+    from django.core.paginator import Paginator
+    paginator = Paginator(vidannya_qs, 10)
+    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Все области наук для фильтрации
-    galuz = GaluzNauki.objects.all()
-
     context = {
-        "vidannya_list": page_obj,
-        "galuz": galuz,
-        "field": field,
-        "query": query,
-        "paginator": paginator,
-        "page_obj": page_obj,
+        'vidannya_list': page_obj,
+        'page_obj': page_obj,
+        'query': query,
+        'field': field,
+        'galuz': GaluzNauki.objects.all(),
+        'favorite_vidannya_ids': list(favorite_vidannya_ids),  # ОБОВ’ЯЗКОВО
     }
-    return render(request, "knowledge/vidannya.html", context)
+
+    return render(request, 'knowledge/vidannya.html', context)
 
 
 
 
 
+
+
+
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 def journals_view(request):
     theme = request.GET.get("theme", "")
     subtopic = request.GET.get("subtopic", "")
     query = request.GET.get("q", "")
 
-    # Фильтрация статей
     journals = JournalArticle.objects.all()
     if theme:
         selected_subject = Subject.objects.filter(name=theme).first()
@@ -247,18 +331,23 @@ def journals_view(request):
     if query:
         journals = journals.filter(title__icontains=query) | journals.filter(author__icontains=query)
 
-    # Пагинация
-    paginator = Paginator(journals, 30)  # 30 статей на страницу
+    paginator = Paginator(journals, 30)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # Получение списка тем и подтем
     subjects = Subject.objects.all()
     translated_subjects = [{"name": s.name, "name_uk": theme_translation_dict.get(s.name, s.name)} for s in subjects]
 
     selected_subject = Subject.objects.filter(name=theme).first() if theme else None
     subtopics = Subtopic.objects.filter(subject=selected_subject) if selected_subject else []
     translated_subtopics = [{"name": st.name, "name_uk": subtopic_translation_dict.get(st.name, st.name)} for st in subtopics]
+
+    # Додати список обраних id для поточного користувача
+    favorite_journal_ids = []
+    if request.user.is_authenticated:
+        favorite_journal_ids = list(
+            request.user.favoriteitem_set.filter(journal_article__isnull=False).values_list('journal_article_id', flat=True)
+        )
 
     context = {
         "journals": page_obj,
@@ -267,8 +356,13 @@ def journals_view(request):
         "selected_theme": theme,
         "selected_subtopic": subtopic,
         "query": query,
+        "favorite_journal_ids": favorite_journal_ids,
+        "reg_form": UserCreationForm(),
+        "login_form": AuthenticationForm(),
     }
     return render(request, "knowledge/journals.html", context)
+
+
 
 
 # journals/views.py
@@ -300,3 +394,20 @@ class JournalListView(ListView):
             qs = qs.filter(specialty__icontains=specialty_filter)
 
         return qs
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def profile_view(request):
+    user = request.user
+    favorite_journals = FavoriteItem.objects.filter(user=request.user, journal_article__isnull=False)
+
+    favorite_vidannya = FavoriteItem.objects.filter(user=request.user, vidannya__isnull=False)
+
+
+    return render(request, 'knowledge/profile.html', {
+        'user': user,
+        'favorite_journals': favorite_journals,
+        'favorite_vidannya': favorite_vidannya,
+    })
+
