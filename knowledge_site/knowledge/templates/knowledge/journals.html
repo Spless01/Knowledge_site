@@ -47,31 +47,57 @@
       </tr>
     </thead>
     <tbody>
-  {% for journal in journals %}
-  <tr>
-    <td class="text-center">
-      <a href="#" onclick="toggleFavorite({{ journal.id }}, 'journal'); return false;">
-        <i id="fav-journal-{{ journal.id }}"
-           class="bi {% if journal.id in favorite_journal_ids %}bi-star-fill text-warning{% else %}bi-star{% endif %}">
-        </i>
-      </a>
-    </td>
-    <td>{{ journal.title }}</td>
-    <td>{{ journal.author }}</td>
-    <td class="text-center">
-      <a href="{{ journal.article_link }}" target="_blank" class="btn btn-outline-primary btn-sm">Переглянути</a>
-    </td>
-    <td class="text-center">
-      <a href="{{ journal.download_link }}" target="_blank" class="btn btn-outline-success btn-sm">Завантажити</a>
-    </td>
-  </tr>
-  {% endfor %}
-</tbody>
-
-
+      {% for journal in journals %}
+        <tr>
+          <td class="text-center">
+            <a href="#" onclick="toggleFavorite({{ journal.id }}, 'journal'); return false;">
+              <i id="fav-journal-{{ journal.id }}"
+                class="bi {% if journal.id in favorite_journal_ids %}bi-star-fill text-warning{% else %}bi-star{% endif %}">
+              </i>
+            </a>
+          </td>
+          <td>{{ journal.title }}</td>
+          <td>{{ journal.author }}</td>
+          <td class="text-center">
+            <a href="{{ journal.article_link }}" target="_blank" class="btn btn-outline-primary btn-sm">Переглянути</a>
+          </td>
+          <td class="text-center">
+            <a href="{{ journal.download_link }}" target="_blank" class="btn btn-outline-success btn-sm">Завантажити</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
 
+<!--  Пагінація -->
+{% if journals.has_other_pages %}
+<nav class="mt-4" data-aos="fade-up">
+  <ul class="pagination justify-content-center">
+    {% if journals.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ journals.previous_page_number }}{% if selected_theme %}&theme={{ selected_theme }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if query %}&q={{ query }}{% endif %}">&laquo;</a>
+      </li>
+    {% endif %}
+
+    {% for page_num in journals.paginator.page_range %}
+      {% if page_num >= journals.number|add:"-2" and page_num <= journals.number|add:"2" %}
+        <li class="page-item {% if page_num == journals.number %}active{% endif %}">
+          <a class="page-link" href="?page={{ page_num }}{% if selected_theme %}&theme={{ selected_theme }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if query %}&q={{ query }}{% endif %}">{{ page_num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if journals.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ journals.next_page_number }}{% if selected_theme %}&theme={{ selected_theme }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if query %}&q={{ query }}{% endif %}">&raquo;</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<!-- Favorite JS -->
 <script>
   function toggleFavorite(id, type) {
     fetch(`/toggle-favorite/?id=${id}&type=${type}`)
